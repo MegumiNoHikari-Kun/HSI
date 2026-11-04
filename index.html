@@ -2,14 +2,19 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<!-- /head-meta -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#0a6b5c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Copas Musrif">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-180.png">
 <title>Copas Musrif</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;600&display=swap">
 <style>
-/* Layout: daftar template di kiri untuk mencari dan menyalin cepat, gelembung chat di kanan untuk melihat hasilnya. */
+/* Layout: HP satu layar per langkah, tablet dan laptop dua panel. Aksi kirim selalu menempel di bawah, dekat jempol. */
 :root {
   --bg: #eef2f0;
   --surface: #ffffff;
@@ -24,7 +29,7 @@
   --hit: #ffe59a;
   --hit-fg: #3d2e00;
   --danger: #b3261e;
-  --danger-soft: #fbe9e7;
+  --star: #b7791f;
   --wall: #e6ded3;
   --bubble: #d9fdd3;
   --bubble-fg: #111b21;
@@ -33,12 +38,13 @@
   --shadow: 0 16px 48px rgba(12, 40, 34, .2);
   --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
   --body: "Figtree", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --arabic: "Noto Naskh Arabic", "Traditional Arabic", "Geeza Pro", serif;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0e1715; --surface: #15211e; --surface-2: #1b2926; --fg: #e7efec; --muted: #9db0aa; --line: #2b3b37;
     --accent: #3fc3a6; --accent-hover: #63d6bd; --on-accent: #06231d; --accent-soft: #1d3d36;
-    --hit: #6b5310; --hit-fg: #ffeec0; --danger: #ff9d94; --danger-soft: #41211e;
+    --hit: #6b5310; --hit-fg: #ffeec0; --danger: #ff9d94; --star: #f2c14e;
     --wall: #0b1412; --bubble: #005c4b; --bubble-fg: #e9f6f2; --slot: #6b5310; --slot-fg: #ffeec0;
     --shadow: 0 16px 48px rgba(0, 0, 0, .55); color-scheme: dark;
   }
@@ -46,139 +52,204 @@
 :root[data-theme="dark"] {
   --bg: #0e1715; --surface: #15211e; --surface-2: #1b2926; --fg: #e7efec; --muted: #9db0aa; --line: #2b3b37;
   --accent: #3fc3a6; --accent-hover: #63d6bd; --on-accent: #06231d; --accent-soft: #1d3d36;
-  --hit: #6b5310; --hit-fg: #ffeec0; --danger: #ff9d94; --danger-soft: #41211e;
+  --hit: #6b5310; --hit-fg: #ffeec0; --danger: #ff9d94; --star: #f2c14e;
   --wall: #0b1412; --bubble: #005c4b; --bubble-fg: #e9f6f2; --slot: #6b5310; --slot-fg: #ffeec0;
   --shadow: 0 16px 48px rgba(0, 0, 0, .55); color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { height: 100%; }
-body { margin: 0; background: var(--bg); color: var(--fg); font: 400 15px/1.5 var(--body); }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 400 15px/1.5 var(--body); -webkit-tap-highlight-color: transparent; }
 button, input, textarea { font: inherit; color: inherit; }
-button { cursor: pointer; }
+input, textarea { font-size: 16px; }
+button, a.btn { cursor: pointer; touch-action: manipulation; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
 .app { height: 100%; display: flex; flex-direction: column; min-height: 0; }
+.gutter { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.notice { background: var(--accent-soft); font-size: 13px; padding-block: 6px; }
 
-.notice { background: var(--accent-soft); font-size: 13px; padding-block: 6px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-
-.top { display: flex; align-items: center; gap: 16px; background: var(--surface); border-bottom: 1px solid var(--line); padding-block: 12px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.top { display: flex; align-items: center; gap: 16px; background: var(--surface); border-bottom: 1px solid var(--line); padding-block: 12px; }
 .brand { font: 700 22px/1 var(--display); letter-spacing: -.02em; margin: 0; white-space: nowrap; }
 .brand span { color: var(--accent); }
 .search { flex: 1; min-width: 0; max-width: 560px; position: relative; display: flex; align-items: center; }
-.search svg { position: absolute; left: 12px; color: var(--muted); pointer-events: none; }
-.search input { width: 100%; height: 42px; padding: 0 44px 0 40px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); }
+.search > svg { position: absolute; left: 12px; color: var(--muted); pointer-events: none; }
+.search input { width: 100%; height: 44px; padding: 0 44px 0 40px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); }
 .search input::-webkit-search-cancel-button { display: none; }
 .search kbd { position: absolute; right: 10px; font: 500 12px var(--body); color: var(--muted); border: 1px solid var(--line); border-radius: 5px; padding: 0 6px; }
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 42px; padding: 0 15px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); font-weight: 600; white-space: nowrap; }
+.clear { position: absolute; right: 2px; display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 0; background: none; color: var(--muted); border-radius: 8px; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 44px; padding: 0 15px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--fg); font-weight: 600; white-space: nowrap; text-decoration: none; }
 .btn:hover { background: var(--surface-2); }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 .btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
-.btn.danger { color: var(--danger); }
-.btn.danger.solid { background: var(--danger); border-color: var(--danger); color: var(--surface); }
 .btn:disabled { opacity: .6; cursor: default; }
+.btn.done, .copy-mini.done { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 .top .btn { margin-left: auto; }
+.icon-btn { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 44px; height: 44px; border: 1px solid transparent; border-radius: 10px; background: none; color: var(--muted); }
+.icon-btn:hover { background: var(--surface-2); color: var(--fg); }
+.icon-btn.danger:hover { color: var(--danger); }
+.icon-btn.star[aria-pressed="true"] { color: var(--star); }
+.icon-btn.star[aria-pressed="true"] svg { fill: currentColor; }
 
 .main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(320px, 420px) minmax(0, 1fr); }
 .list-pane { min-height: 0; min-width: 0; display: flex; flex-direction: column; background: var(--surface); border-right: 1px solid var(--line); }
-.chips { display: flex; gap: 6px; overflow-x: auto; padding: 12px 16px; border-bottom: 1px solid var(--line); scrollbar-width: none; flex: none; }
-.chip { flex: none; border: 1px solid var(--line); background: transparent; border-radius: 99px; padding: 4px 12px; font-size: 13px; font-weight: 500; color: var(--muted); }
+.chips { display: flex; gap: 6px; overflow-x: auto; padding: 10px 16px; border-bottom: 1px solid var(--line); scrollbar-width: none; flex: none; }
+.chips::-webkit-scrollbar { display: none; }
+.chips.more { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent); }
+.chip { flex: none; min-height: 36px; border: 1px solid var(--line); background: transparent; border-radius: 99px; padding: 0 13px; font-size: 13px; font-weight: 500; color: var(--muted); }
 .chip:hover { color: var(--fg); }
 .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
-.scroll { flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 16px; }
-.group-title { position: sticky; top: 0; z-index: 1; margin: 0; padding: 12px 16px 5px; background: var(--surface); font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.scroll { flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 24px; overscroll-behavior: contain; }
+.group-title { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; gap: 8px; margin: 0; padding: 12px 16px 5px; background: var(--surface); font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.group-title small { font-size: 12px; font-weight: 500; letter-spacing: 0; text-transform: none; }
 .rows { list-style: none; margin: 0; padding: 0 8px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; }
-.row { display: flex; align-items: center; gap: 4px; border-radius: 10px; }
+.row { display: flex; align-items: center; gap: 4px; border-radius: 10px; min-width: 0; }
 .row:hover { background: var(--surface-2); }
 .row.on { background: var(--accent-soft); }
-.row-main { flex: 1; min-width: 0; border: 0; background: none; text-align: left; padding: 9px 8px; border-radius: 10px; }
+.row-main { flex: 1; min-width: 0; min-height: 56px; border: 0; background: none; text-align: left; padding: 8px; border-radius: 10px; }
 .row-title { display: block; font-weight: 600; overflow-wrap: anywhere; }
+.row-title svg { width: 13px; height: 13px; margin-left: 4px; color: var(--star); fill: currentColor; vertical-align: -1px; }
 .row-snippet { display: block; color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.period { color: var(--accent); font-size: 12px; font-weight: 600; }
+.now-tag { margin-left: 5px; padding: 0 6px; border-radius: 99px; background: var(--accent); color: var(--on-accent); font-size: 11px; font-weight: 600; }
 mark.hit { background: var(--hit); color: var(--hit-fg); border-radius: 2px; }
-.copy-mini { display: inline-flex; align-items: center; gap: 5px; flex: none; min-height: 36px; margin-right: 6px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--accent); font-size: 13px; font-weight: 600; }
+.copy-mini { display: inline-flex; align-items: center; justify-content: center; gap: 5px; flex: none; min-width: 44px; min-height: 40px; margin-right: 6px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--accent); font-size: 13px; font-weight: 600; }
 .copy-mini:hover { border-color: var(--accent); }
 .copy-mini svg { width: 15px; height: 15px; }
-.copy-mini.done, .btn.done { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.check { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 40px; height: 44px; border: 0; background: none; color: var(--on-accent); }
+.check i { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border: 2px solid var(--line); border-radius: 50%; }
+.check svg { width: 14px; height: 14px; stroke-width: 3; opacity: 0; }
+.check[aria-pressed="true"] i { background: var(--accent); border-color: var(--accent); }
+.check[aria-pressed="true"] svg { opacity: 1; }
+.row.sent .row-title { color: var(--muted); }
 
 .state { padding: 32px 20px; text-align: center; color: var(--muted); display: grid; gap: 12px; justify-items: center; }
 .state strong { color: var(--fg); overflow-wrap: anywhere; }
 
 .detail { min-width: 0; min-height: 0; display: flex; flex-direction: column; background: var(--wall); }
-.detail-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: var(--surface); border-bottom: 1px solid var(--line); padding: 12px 20px; }
-.detail-info { flex: 1; min-width: 200px; }
-.detail-info h2 { margin: 0; font: 600 20px/1.25 var(--display); letter-spacing: -.01em; text-wrap: balance; overflow-wrap: anywhere; }
-.meta { margin: 2px 0 0; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
-.actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.back { display: none; }
-.confirm { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: var(--danger-soft); padding: 10px 20px; }
-.confirm p { margin: 0 auto 0 0; font-weight: 500; overflow-wrap: anywhere; min-width: 0; }
-.chat { flex: 1; min-height: 0; overflow-y: auto; padding: 24px 20px; }
-.chat-inner { max-width: 620px; margin: 0 auto; display: grid; gap: 10px; }
-.bubble { position: relative; justify-self: end; max-width: 100%; min-width: 0; padding: 8px 12px 6px; background: var(--bubble); color: var(--bubble-fg); border-radius: 10px 0 10px 10px; font-size: 15px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; box-shadow: 0 1px 1px rgba(0, 0, 0, .12); }
+.detail-head { display: flex; align-items: center; gap: 4px; background: var(--surface); border-bottom: 1px solid var(--line); padding: 8px 12px 8px 20px; }
+.detail-info { flex: 1; min-width: 0; }
+.detail-info h2 { margin: 0; font: 600 19px/1.25 var(--display); letter-spacing: -.01em; overflow-wrap: anywhere; }
+.meta { margin: 1px 0 0; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.back { display: none; margin-left: -8px; color: var(--fg); }
+.chat { flex: 1; min-height: 0; overflow-y: auto; padding: 20px; overscroll-behavior: contain; }
+.chat-inner { max-width: 620px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+.slots { display: grid; gap: 10px; padding: 12px 14px 14px; border-radius: 12px; background: var(--surface); }
+.slots-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 28px; }
+.slots-head strong { font-size: 14px; }
+.link { border: 0; background: none; padding: 4px 0; color: var(--accent); font-size: 13px; font-weight: 600; }
+.slot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.bubble { position: relative; justify-self: end; max-width: 100%; min-width: 0; padding: 8px 12px 6px; background: var(--bubble); color: var(--bubble-fg); border-radius: 10px 0 10px 10px; font-size: 15px; line-height: 1.45; overflow-wrap: anywhere; box-shadow: 0 1px 1px rgba(0, 0, 0, .12); }
 .bubble::after { content: ""; position: absolute; top: 0; right: -8px; border-top: 9px solid var(--bubble); border-right: 9px solid transparent; }
+.chat-inner .bubble, .live-box .bubble { margin-right: 8px; }
+.bubble div { white-space: pre-wrap; text-align: start; }
+.bubble .ar { font-family: var(--arabic); font-size: 1.28em; line-height: 1.8; }
+.bubble .basmalah { font-family: var(--arabic); font-size: 1.6em; text-align: center; }
 .bubble .time { display: block; text-align: right; margin-top: 2px; font-size: 11px; opacity: .65; font-variant-numeric: tabular-nums; }
 .bubble code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .92em; }
 mark.slot { background: var(--slot); color: var(--slot-fg); border-radius: 3px; padding: 0 2px; }
-.hint { justify-self: end; margin: 0; font-size: 13px; color: var(--muted); }
-.hint mark { font-size: 12px; }
 
-dialog { width: min(880px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 0; border: 0; border-radius: 14px; background: var(--surface); color: var(--fg); box-shadow: var(--shadow); }
+.dock { background: var(--surface); border-top: 1px solid var(--line); padding: 10px 20px calc(10px + env(safe-area-inset-bottom, 0px)); }
+.dock-inner { max-width: 620px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+.dock .btn { min-height: 48px; }
+
+dialog { width: min(880px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 0; border: 0; border-radius: 14px; background: var(--surface); color: var(--fg); box-shadow: var(--shadow); overflow: hidden; }
+dialog[open] { display: flex; }
 dialog::backdrop { background: rgba(8, 24, 20, .5); }
 dialog.small { width: min(400px, calc(100vw - 32px)); }
-dialog form { display: flex; flex-direction: column; gap: 14px; padding: 20px; }
+dialog form { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.form-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px 0; }
 dialog h2 { margin: 0; font: 600 20px/1.25 var(--display); }
+.pass-body { display: grid; gap: 12px; padding: 12px 20px 0; }
 dialog p { margin: 0; color: var(--muted); }
-.form-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+.tabs { display: none; padding: 3px; border-radius: 10px; background: var(--surface-2); }
+.tabs button { min-height: 36px; padding: 0 12px; border: 0; border-radius: 8px; background: none; font-size: 14px; font-weight: 600; color: var(--muted); }
+.tabs button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+.form-grid { flex: 1; min-height: 0; overflow-y: auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; padding: 14px 20px; }
 .fields { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-.field { display: grid; gap: 4px; }
+.field { display: grid; gap: 4px; min-width: 0; }
 .field label, .label { font-size: 13px; font-weight: 600; }
-.field input, .field textarea { width: 100%; padding: 9px 11px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface-2); }
-.field textarea { min-height: 220px; resize: vertical; line-height: 1.45; border-radius: 0 0 9px 9px; }
+.field input, .field textarea { width: 100%; min-width: 0; padding: 9px 11px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface-2); }
+.field textarea { display: block; min-height: 220px; resize: vertical; line-height: 1.45; border-radius: 0 0 9px 9px; }
+.cat-pick { display: flex; flex-wrap: wrap; gap: 4px; }
+.cat-pick .chip { min-height: 32px; padding: 0 10px; font-size: 12px; }
 .tools { display: flex; align-items: center; gap: 2px; padding: 3px; border: 1px solid var(--line); border-bottom: 0; border-radius: 9px 9px 0 0; }
-.tools button { min-width: 36px; height: 32px; border: 0; border-radius: 6px; background: none; }
+.tools button { min-width: 40px; height: 36px; border: 0; border-radius: 6px; background: none; }
 .tools button:hover { background: var(--surface-2); }
 .tools .b { font-weight: 700; } .tools .i { font-style: italic; } .tools .s { text-decoration: line-through; }
+.tools .slot-add { min-width: 44px; font-size: 14px; font-weight: 600; }
 .tools span { margin-left: auto; padding-right: 6px; font-size: 12px; color: var(--muted); }
 .live { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.live-box { flex: 1; min-height: 180px; max-height: 390px; overflow-y: auto; padding: 16px 18px 16px 12px; border-radius: 10px; background: var(--wall); display: grid; align-content: start; }
-.form-foot { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.live-box { flex: 1; min-height: 180px; overflow-y: auto; padding: 16px 12px; border-radius: 10px; background: var(--wall); display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; }
+.form-foot { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; padding: 12px 20px calc(16px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); }
+.small .form-foot { border-top: 0; }
 .error { margin-right: auto; color: var(--danger); font-size: 14px; font-weight: 500; }
 
-.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 20; max-width: calc(100vw - 32px); background: var(--fg); color: var(--bg); padding: 9px 15px; border-radius: 9px; font-weight: 500; }
+.toast { position: fixed; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 20; display: flex; align-items: center; gap: 14px; width: max-content; max-width: calc(100vw - 32px); background: var(--fg); color: var(--bg); padding: 8px 15px; border-radius: 9px; font-weight: 500; }
+.toast button { flex: none; min-height: 32px; border: 0; background: none; color: var(--bg); font-weight: 700; text-decoration: underline; }
 
-@media (max-width: 760px) {
-  .top { flex-wrap: wrap; gap: 10px; }
+@media (max-width: 1023px) and (min-width: 701px) {
+  .main { grid-template-columns: 300px minmax(0, 1fr); }
+  .list-pane .copy-mini span { display: none; }
+  .search kbd { display: none; }
+}
+
+@media (max-width: 700px) {
+  .top { flex-wrap: wrap; gap: 10px; padding-block: 10px; }
+  .top .btn { min-height: 40px; }
   .search { order: 3; flex-basis: 100%; max-width: none; }
   .search kbd { display: none; }
   .main { grid-template-columns: minmax(0, 1fr); }
   .list-pane { border-right: 0; }
   .detail { display: none; }
-  .app.reading .list-pane { display: none; }
+  .app.reading .list-pane, .app.reading .top { display: none; }
   .app.reading .detail { display: flex; }
-  .app.reading .top { display: none; }
   .back { display: inline-flex; }
-  .detail-head { padding: 10px 16px; }
-  .actions { width: 100%; }
-  .actions .wide { flex: 1; }
-  .chat { padding: 16px; }
-  .form-grid { grid-template-columns: minmax(0, 1fr); }
-  .field textarea { min-height: 170px; }
-  .live-box { min-height: 110px; max-height: 200px; }
+  .detail-head { padding: 6px 8px 6px 16px; }
+  .chat { padding: 14px 16px; }
+  .dock { padding-left: 16px; padding-right: 16px; }
+  .slot-grid { grid-template-columns: minmax(0, 1fr); }
+
+  #editor { width: 100%; height: var(--vvh, 100dvh); max-width: none; max-height: none; margin: 0; inset: 0 auto auto 0; border-radius: 0; box-shadow: none; }
+  .form-head { padding: calc(10px + env(safe-area-inset-top, 0px)) 16px 0; }
+  .tabs { display: inline-flex; }
+  .form-grid { grid-template-columns: minmax(0, 1fr); align-content: stretch; padding: 12px 16px; }
+  .form-grid[data-tab="write"] .live, .form-grid[data-tab="preview"] .fields { display: none; }
+  .row.on { background: none; }
+  .fields { min-height: 100%; }
+  .fields .field:last-child { flex: 1; grid-template-rows: auto minmax(0, 1fr); }
+  .fields .field:last-child > div { display: flex; flex-direction: column; min-height: 0; }
+  .field textarea { flex: 1; min-height: 180px; resize: none; }
+  .form-foot { padding: 8px 16px calc(8px + env(safe-area-inset-bottom, 0px)); }
   .form-foot .btn { flex: 1; }
   .error { flex-basis: 100%; }
+}
+
+@media (max-height: 480px) {
+  .top { padding-block: 6px; }
+  .notice { display: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .app.reading .detail { animation: slide .16s ease-out; }
+  @keyframes slide { from { transform: translateX(16px); opacity: .6; } to { transform: none; opacity: 1; } }
 }
 </style>
 </head>
 <body>
 <div class="app" id="app">
-  <div class="notice" id="notice" hidden>Ini pratinjau dengan contoh template. Perubahan hilang saat halaman ditutup.</div>
-  <header class="top">
+  <div class="notice gutter" id="notice" hidden>Ini pratinjau dengan contoh template. Perubahan hilang saat halaman ditutup.</div>
+  <header class="top gutter">
     <h1 class="brand">Copas<span>Musrif</span></h1>
     <label class="search">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input id="q" type="search" placeholder="Cari judul atau isi template" aria-label="Cari template" autocomplete="off">
-      <kbd>/</kbd>
+      <input id="q" type="search" enterkeyhint="search" placeholder="Cari judul atau isi template" aria-label="Cari template" autocomplete="off">
+      <kbd id="kbd">/</kbd>
+      <button class="clear" id="clearQ" type="button" aria-label="Hapus pencarian" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
     </label>
     <button class="btn primary" id="add" type="button">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Template baru
@@ -196,17 +267,23 @@ dialog p { margin: 0; color: var(--muted); }
 
 <dialog id="editor">
   <form id="editForm" novalidate>
-    <h2 id="editTitle">Template baru</h2>
-    <div class="form-grid">
+    <div class="form-head">
+      <h2 id="editTitle">Template baru</h2>
+      <div class="tabs" role="group" aria-label="Tampilan form">
+        <button type="button" data-tab="write" aria-pressed="true">Tulis</button>
+        <button type="button" data-tab="preview" aria-pressed="false">Pratinjau</button>
+      </div>
+    </div>
+    <div class="form-grid" id="formGrid" data-tab="write">
       <div class="fields">
         <div class="field">
           <label for="fTitle">Judul</label>
-          <input id="fTitle" maxlength="120" placeholder="Contoh: Reminder pagi hari Senin" required>
+          <input id="fTitle" maxlength="120" enterkeyhint="next" placeholder="Contoh: Reminder pagi hari Senin" required>
         </div>
         <div class="field">
           <label for="fCat">Kategori</label>
-          <input id="fCat" list="cats" maxlength="60" placeholder="Pilih atau ketik kategori baru" autocomplete="off">
-          <datalist id="cats"></datalist>
+          <input id="fCat" maxlength="60" enterkeyhint="next" placeholder="Pilih di bawah atau ketik baru" autocomplete="off">
+          <div class="cat-pick" id="catPick"></div>
         </div>
         <div class="field">
           <label for="fBody">Isi chat</label>
@@ -215,9 +292,10 @@ dialog p { margin: 0; color: var(--muted); }
               <button type="button" class="b" data-wrap="*" aria-label="Tebal">B</button>
               <button type="button" class="i" data-wrap="_" aria-label="Miring">I</button>
               <button type="button" class="s" data-wrap="~" aria-label="Coret">S</button>
+              <button type="button" class="slot-add" id="addSlot" aria-label="Tambah bagian isian">[ ]</button>
               <span id="count">0 karakter</span>
             </div>
-            <textarea id="fBody" required placeholder="Tulis isi chat. Gunakan [tautan] untuk bagian yang perlu diganti."></textarea>
+            <textarea id="fBody" required placeholder="Tulis isi chat. Gunakan [tautan] untuk bagian yang perlu diisi saat dikirim."></textarea>
           </div>
         </div>
       </div>
@@ -236,11 +314,13 @@ dialog p { margin: 0; color: var(--muted); }
 
 <dialog id="pass" class="small">
   <form id="passForm" novalidate>
-    <h2>Masukkan kata sandi</h2>
-    <p>Kata sandi dibutuhkan untuk menyimpan perubahan.</p>
-    <div class="field">
-      <label for="fPass">Kata sandi</label>
-      <input id="fPass" type="password" autocomplete="current-password">
+    <div class="form-head"><h2>Masukkan kata sandi</h2></div>
+    <div class="pass-body">
+      <p>Kata sandi dibutuhkan untuk menyimpan perubahan.</p>
+      <div class="field">
+        <label for="fPass">Kata sandi</label>
+        <input id="fPass" type="password" autocomplete="current-password">
+      </div>
     </div>
     <div class="form-foot">
       <span class="error" id="passError" role="alert"></span>
@@ -256,37 +336,74 @@ dialog p { margin: 0; color: var(--muted); }
 (() => {
   const DEMO = !!window.COPAS_DEMO;
   const API = '/api/templates';
-  const PASS_KEY = 'copas-musrif-pass';
-  const CATEGORY_ORDER = ['Pembukaan', 'Reminder Pagi', 'Reminder Siang', 'Evaluasi Harian', 'Langkah-langkah'];
+  const CATEGORY_ORDER = ['Pembukaan', 'Reminder Pagi', 'Reminder Siang', 'Reminder Malam', 'Evaluasi Harian', 'Langkah-langkah'];
   const ALL = 'Semua';
+  const FAV = 'Favorit';
+  const RECENT = 'Terakhir';
+  const PERIODS = [
+    { key: 'pagi', label: 'Pagi', test: /\bpagi\b/i },
+    { key: 'siang', label: 'Siang', test: /\bsiang\b/i },
+    { key: 'malam', label: 'Malam', test: /\bmalam\b/i },
+  ];
+  const SLOT = /\[[^\]\n]+\]/g;
   const ICON = {
     copy: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>',
     check: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
     edit: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 5 5 5-10.5 10.5H4v-4.5L14 5Z"/></svg>',
     trash: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6.5 7l1 13h9l1-13"/></svg>',
     back: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>',
+    star: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3.5 2.6 5.5 6 .8-4.4 4.2 1.1 6-5.3-3-5.3 3 1.1-6L3.400 9.800l6-.8L12 3.500Z"/></svg>',
+    send: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12 20 4l-5 16-3.500-6.500L4 12Z"/></svg>',
   };
 
   const $ = (id) => document.getElementById(id);
-  const state = { items: [], status: 'loading', error: '', q: '', cat: ALL, sel: null, editingId: null, confirming: false };
+  const app = $('app');
+  const narrowQuery = window.matchMedia('(max-width: 700px)');
+  const narrow = () => narrowQuery.matches;
+
+  // Data milik perangkat ini saja. Tetap jalan bila penyimpanan browser diblokir.
+  const memory = {};
+  const device = {
+    get(key, fallback) {
+      if (key in memory) return memory[key];
+      try { const raw = localStorage.getItem(`copas-${key}`); if (raw !== null) return JSON.parse(raw); } catch {}
+      return fallback;
+    },
+    set(key, value) {
+      memory[key] = value;
+      try { localStorage.setItem(`copas-${key}`, JSON.stringify(value)); } catch {}
+    },
+  };
+
+  const state = {
+    items: [], status: 'loading', error: '', q: '', cat: ALL, sel: null, editingId: null,
+    favorites: device.get('favorites', []),
+    recent: device.get('recent', []),
+    values: device.get('values', {}),
+    today: device.get('today', { date: '', done: {} }),
+  };
 
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const getPass = () => { try { return localStorage.getItem(PASS_KEY) || ''; } catch { return memPass; } };
-  const setPass = (v) => { memPass = v; try { v ? localStorage.setItem(PASS_KEY, v) : localStorage.removeItem(PASS_KEY); } catch {} };
-  let memPass = '';
+  const getPass = () => device.get('pass', '');
+  const setPass = (v) => device.set('pass', v);
 
   const local = {
     list: async () => (window.COPAS_SEED || []).map((t) => ({ ...t })),
-    create: async (d) => ({ ...d, id: 'demo-' + Date.now(), updatedAt: new Date().toISOString() }),
+    create: async (d) => ({ ...d, id: `demo-${Date.now()}`, updatedAt: new Date().toISOString() }),
     update: async (id, d) => ({ ...d, id, updatedAt: new Date().toISOString() }),
     remove: async () => true,
   };
 
   async function call(url, options = {}) {
-    const res = await fetch(url, {
-      ...options,
-      headers: { 'Content-Type': 'application/json', 'X-Admin-Password': encodeURIComponent(getPass()), ...options.headers },
-    });
+    let res;
+    try {
+      res = await fetch(url, {
+        ...options,
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': encodeURIComponent(getPass()), ...options.headers },
+      });
+    } catch {
+      throw new Error('Tidak bisa terhubung. Periksa internet, lalu coba lagi.');
+    }
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw Object.assign(new Error(data.error || 'Tidak bisa terhubung ke server. Coba lagi.'), { status: res.status });
     return data;
@@ -335,17 +452,33 @@ dialog p { margin: 0; color: var(--muted); }
     });
   }
 
+  // Tampilan WhatsApp: tiap baris mengikuti arah tulisannya sendiri, jadi teks Arab rata kanan.
   function formatWa(text) {
-    const edge = `(^|[\\s>(*_~])`;
-    const tail = `(?=$|[\\s.,!?:;)<*_~])`;
-    return esc(text)
-      .replace(/```([\s\S]+?)```/g, '<code>$1</code>')
+    const edge = '(^|[\\s>(*_~])';
+    const tail = '(?=$|[\\s.,!?:;)<*_~])';
+    const html = esc(text)
+      .replace(/```([^\n]+?)```/g, '<code>$1</code>')
       .replace(new RegExp(`${edge}\\*([^\\s*](?:[^*\\n]*[^\\s*])?)\\*${tail}`, 'gm'), '$1<strong>$2</strong>')
       .replace(new RegExp(`${edge}_([^\\s_](?:[^_\\n]*[^\\s_])?)_${tail}`, 'gm'), '$1<em>$2</em>')
       .replace(new RegExp(`${edge}~([^\\s~](?:[^~\\n]*[^\\s~])?)~${tail}`, 'gm'), '$1<s>$2</s>')
-      .replace(/\[[^\]\n]+\]/g, '<mark class="slot">$&</mark>');
+      .replace(SLOT, '<mark class="slot">$&</mark>');
+    const raw = text.split('\n');
+    return html.split('\n').map((line, i) => {
+      const source = (raw[i] || '').trim();
+      if (!source) return '<div><br></div>';
+      if (source === '﷽') return `<div class="basmalah">${line}</div>`;
+      const arabic = /[؀-ۿﭐ-﷿ﹰ-﻿]/.test(source) && !/\p{Script=Latin}/u.test(source);
+      return `<div dir="auto"${arabic ? ' class="ar"' : ''}>${line}</div>`;
+    }).join('');
   }
 
+  // Bagian [isian]
+  const slotKey = (slot) => slot.toLowerCase();
+  const slotsOf = (body) => [...new Set(body.match(SLOT) || [])];
+  const fill = (body) => body.replace(SLOT, (m) => (state.values[slotKey(m)] || '').trim() || m);
+  const emptySlots = (body) => slotsOf(body).filter((s) => !(state.values[slotKey(s)] || '').trim()).length;
+
+  // Pencarian
   const tokens = () => state.q.toLowerCase().split(/\s+/).filter(Boolean);
   const matches = (t, words) => {
     const hay = `${t.title} ${t.category} ${t.body}`.toLowerCase();
@@ -356,28 +489,104 @@ dialog p { margin: 0; color: var(--muted); }
     const re = new RegExp(`(${words.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi');
     return text.split(re).map((part, i) => (i % 2 ? `<mark class="hit">${esc(part)}</mark>` : esc(part))).join('');
   }
+  // Cuplikan melewati baris pembuka seperti basmalah dan judul emoji, supaya tiap template terlihat berbeda.
   function snippet(body, words) {
-    const flat = body.replace(/[*_~]/g, '').replace(/\s+/g, ' ').trim();
-    const lower = flat.toLowerCase();
-    const at = words.reduce((found, w) => (found >= 0 ? found : lower.indexOf(w)), -1);
-    return at > 30 ? '…' + flat.slice(at - 20) : flat;
+    const clean = (s) => s.replace(/[*_~]/g, '').replace(/\p{Regional_Indicator}/gu, '').replace(/\s+/g, ' ').trim();
+    const readable = clean(body.split('\n').filter((l) => /\p{Script=Latin}/u.test(l.replace(/\p{Regional_Indicator}/gu, ''))).join(' '));
+    const pick = (text) => {
+      const lower = text.toLowerCase();
+      const at = words.reduce((found, w) => (found >= 0 ? found : lower.indexOf(w)), -1);
+      return { text, at };
+    };
+    let { text, at } = pick(readable);
+    if (words.length && at < 0) ({ text, at } = pick(clean(body)));
+    return at > 30 ? `…${text.slice(at - 20)}` : (text || clean(body));
   }
 
   const catRank = (c) => { const i = CATEGORY_ORDER.indexOf(c); return i < 0 ? CATEGORY_ORDER.length : i; };
   const byCategory = (a, b) => catRank(a) - catRank(b) || a.localeCompare(b, 'id');
+  const byTitle = (a, b) => a.title.localeCompare(b.title, 'id', { numeric: true });
   const categories = () => [...new Set(state.items.map((t) => t.category))].sort(byCategory);
-  const sorted = () => [...state.items].sort((a, b) => byCategory(a.category, b.category) || a.title.localeCompare(b.title, 'id', { numeric: true }));
-  const visible = () => {
+  const sorted = () => [...state.items].sort((a, b) => byCategory(a.category, b.category) || byTitle(a, b));
+  const find = (id) => state.items.find((t) => t.id === id) || null;
+  const selected = () => find(state.sel);
+  const recentItems = () => state.recent.map(find).filter(Boolean);
+  const favoriteItems = () => sorted().filter((t) => state.favorites.includes(t.id));
+
+  function visible() {
     const words = tokens();
-    return sorted().filter((t) => (state.cat === ALL || t.category === state.cat) && matches(t, words));
-  };
-  const selected = () => state.items.find((t) => t.id === state.sel) || null;
+    let base = sorted();
+    if (state.cat === FAV) base = favoriteItems();
+    else if (state.cat === RECENT) base = recentItems();
+    else if (state.cat !== ALL) base = base.filter((t) => t.category === state.cat);
+    return base.filter((t) => matches(t, words));
+  }
+
+  // Hari ini: satu saran per waktu, bergantian tiap hari.
+  function dayKey(d = new Date()) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+  function todayState() {
+    if (state.today.date !== dayKey()) { state.today = { date: dayKey(), done: {} }; device.set('today', state.today); }
+    return state.today;
+  }
+  const currentPeriod = () => { const h = new Date().getHours(); return h < 11 ? 'pagi' : h < 17 ? 'siang' : 'malam'; };
+  function todayPlan() {
+    const now = new Date();
+    const dayNumber = Math.floor(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 86400000);
+    const { done } = todayState();
+    return PERIODS.map((p) => {
+      const options = state.items.filter((t) => p.test.test(t.category)).sort(byTitle);
+      if (!options.length) return null;
+      const template = find(done[p.key]) || options[dayNumber % options.length];
+      return { ...p, template, done: !!done[p.key] };
+    }).filter(Boolean);
+  }
 
   function renderChips() {
-    if (state.cat !== ALL && !categories().includes(state.cat)) state.cat = ALL;
-    $('chips').innerHTML = [ALL, ...categories()].map((c) =>
+    const filters = [ALL];
+    if (favoriteItems().length) filters.push(FAV);
+    if (recentItems().length) filters.push(RECENT);
+    const all = [...filters, ...categories()];
+    if (!all.includes(state.cat)) state.cat = ALL;
+    $('chips').innerHTML = all.map((c) =>
       `<button type="button" class="chip" data-cat="${esc(c)}" aria-pressed="${c === state.cat}">${esc(c)}</button>`).join('');
-    $('cats').innerHTML = [...new Set([...CATEGORY_ORDER, ...categories()])].map((c) => `<option value="${esc(c)}"></option>`).join('');
+    updateChipFade();
+  }
+  function updateChipFade() {
+    const el = $('chips');
+    el.classList.toggle('more', el.scrollWidth - el.clientWidth - el.scrollLeft > 4);
+  }
+
+  const copyMini = (t) => `<button type="button" class="copy-mini" data-copy="${esc(t.id)}" aria-label="Salin ${esc(t.title)}">${ICON.copy}<span>Salin</span></button>`;
+
+  function renderToday() {
+    if (state.q || state.cat !== ALL) return '';
+    const plan = todayPlan();
+    if (!plan.length) return '';
+    const now = currentPeriod();
+    const date = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' });
+    const finished = plan.filter((p) => p.done).length;
+    return `<h2 class="group-title">Hari ini <small>${esc(date)} · ${finished}/${plan.length} terkirim</small></h2><ul class="rows">${plan.map((p) => `
+      <li class="row${p.done ? ' sent' : ''}${p.template.id === state.sel ? ' on' : ''}">
+        <button type="button" class="check" data-done="${p.key}" aria-pressed="${p.done}" aria-label="Tandai ${p.label} sudah dikirim"><i>${ICON.check}</i></button>
+        <button type="button" class="row-main" data-open="${esc(p.template.id)}" style="padding-left:0">
+          <span class="period">${p.label}${p.key === now && !p.done ? '<span class="now-tag">Sekarang</span>' : ''}</span>
+          <span class="row-title">${esc(p.template.title)}</span>
+        </button>
+        ${copyMini(p.template)}
+      </li>`).join('')}</ul>`;
+  }
+
+  function renderRow(t, words) {
+    const fav = state.favorites.includes(t.id) ? ICON.star : '';
+    return `<li class="row${t.id === state.sel ? ' on' : ''}">
+      <button type="button" class="row-main" data-open="${esc(t.id)}">
+        <span class="row-title">${highlight(t.title, words)}${fav}</span>
+        <span class="row-snippet">${highlight(snippet(t.body, words), words)}</span>
+      </button>
+      ${copyMini(t)}
+    </li>`;
   }
 
   function renderList() {
@@ -390,28 +599,43 @@ dialog p { margin: 0; color: var(--muted); }
     const list = visible();
     if (!list.length) {
       box.innerHTML = state.items.length
-        ? `<div class="state"><strong>Tidak ada template yang cocok${state.q ? ` dengan “${esc(state.q)}”` : ''}</strong><span>Coba kata lain atau pilih kategori Semua.</span></div>`
+        ? `<div class="state"><strong>Tidak ada template yang cocok${state.q ? ` dengan “${esc(state.q)}”` : ''}</strong><span>Coba kata lain atau pilih Semua.</span></div>`
         : '<div class="state"><strong>Belum ada template</strong><span>Tekan Template baru untuk membuat yang pertama.</span></div>';
       return;
     }
     const words = tokens();
-    let html = '';
-    let current = null;
-    list.forEach((t) => {
-      if (t.category !== current) {
-        if (current !== null) html += '</ul>';
-        current = t.category;
-        html += `<h2 class="group-title">${esc(current)}</h2><ul class="rows">`;
-      }
-      html += `<li class="row${t.id === state.sel ? ' on' : ''}">
-        <button type="button" class="row-main" data-open="${esc(t.id)}">
-          <span class="row-title">${highlight(t.title, words)}</span>
-          <span class="row-snippet">${highlight(snippet(t.body, words), words)}</span>
-        </button>
-        <button type="button" class="copy-mini" data-copy="${esc(t.id)}" aria-label="Salin ${esc(t.title)}">${ICON.copy}Salin</button>
-      </li>`;
-    });
-    box.innerHTML = html + '</ul>';
+    let html = renderToday();
+    if (state.cat === RECENT) {
+      html += `<h2 class="group-title">Terakhir dipakai</h2><ul class="rows">${list.map((t) => renderRow(t, words)).join('')}</ul>`;
+    } else {
+      let current = null;
+      list.forEach((t) => {
+        if (t.category !== current) {
+          if (current !== null) html += '</ul>';
+          current = t.category;
+          html += `<h2 class="group-title">${esc(current)}</h2><ul class="rows">`;
+        }
+        html += renderRow(t, words);
+      });
+      html += '</ul>';
+    }
+    box.innerHTML = html;
+  }
+
+  const waHref = (t) => `https://wa.me/?text=${encodeURIComponent(fill(t.body))}`;
+  const clock = () => new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+  function renderSlots(t) {
+    const slots = slotsOf(t.body);
+    if (!slots.length) return '';
+    const hasValue = slots.some((s) => state.values[slotKey(s)]);
+    return `<div class="slots">
+      <div class="slots-head"><strong>Lengkapi sebelum kirim</strong>${hasValue ? '<button type="button" class="link" data-act="clear-slots">Kosongkan</button>' : ''}</div>
+      <div class="slot-grid">${slots.map((s, i) => `<div class="field">
+        <label for="slot${i}">${esc(s.slice(1, -1))}</label>
+        <input id="slot${i}" data-slot="${esc(slotKey(s))}" value="${esc(state.values[slotKey(s)] || '')}" autocomplete="off" enterkeyhint="done">
+      </div>`).join('')}</div>
+    </div>`;
   }
 
   function renderDetail() {
@@ -419,72 +643,137 @@ dialog p { margin: 0; color: var(--muted); }
     const box = $('detail');
     if (!t) { box.innerHTML = '<div class="state" style="margin:auto">Pilih template untuk melihat tampilannya.</div>'; return; }
     const date = new Date(t.updatedAt);
-    const when = isNaN(date) ? '' : ` · Diperbarui ${date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}`;
-    const clock = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-    const hasSlot = /\[[^\]\n]+\]/.test(t.body);
+    const when = isNaN(date) ? '' : ` · ${date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+    const fav = state.favorites.includes(t.id);
     box.innerHTML = `
       <div class="detail-head">
-        <button type="button" class="btn back" data-act="back" aria-label="Kembali ke daftar">${ICON.back}</button>
-        <div class="detail-info"><h2>${esc(t.title)}</h2><p class="meta">${esc(t.category)} · ${t.body.length} karakter${when}</p></div>
-        <div class="actions">
-          <button type="button" class="btn" data-act="edit">${ICON.edit}Ubah</button>
-          <button type="button" class="btn danger" data-act="ask-delete">${ICON.trash}Hapus</button>
-          <button type="button" class="btn primary wide" data-copy="${esc(t.id)}">${ICON.copy}Salin template</button>
-        </div>
+        <button type="button" class="icon-btn back" data-act="back" aria-label="Kembali ke daftar">${ICON.back}</button>
+        <div class="detail-info"><h2>${esc(t.title)}</h2><p class="meta">${esc(t.category)}${when}</p></div>
+        <button type="button" class="icon-btn star" data-act="favorite" aria-pressed="${fav}" aria-label="Favorit" title="Favorit">${ICON.star}</button>
+        <button type="button" class="icon-btn" data-act="edit" aria-label="Ubah" title="Ubah">${ICON.edit}</button>
+        <button type="button" class="icon-btn danger" data-act="delete" aria-label="Hapus" title="Hapus">${ICON.trash}</button>
       </div>
-      ${state.confirming ? `<div class="confirm" role="alert"><p>Hapus “${esc(t.title)}”?</p>
-        <button type="button" class="btn" data-act="cancel-delete">Batal</button>
-        <button type="button" class="btn danger solid" data-act="delete">Hapus template</button></div>` : ''}
       <div class="chat"><div class="chat-inner">
-        <div class="bubble">${formatWa(t.body)}<span class="time">${clock}</span></div>
-        ${hasSlot ? '<p class="hint">Ganti bagian <mark class="slot">[yang disorot]</mark> sebelum dikirim.</p>' : ''}
+        ${renderSlots(t)}
+        <div class="bubble" id="bubble">${formatWa(fill(t.body))}<span class="time">${clock()}</span></div>
+      </div></div>
+      <div class="dock"><div class="dock-inner">
+        <a class="btn" id="waLink" data-wa="${esc(t.id)}" href="${esc(waHref(t))}" target="_blank" rel="noopener">${ICON.send}WhatsApp</a>
+        <button type="button" class="btn primary" data-copy="${esc(t.id)}">${ICON.copy}<span>Salin</span></button>
       </div></div>`;
+  }
+
+  function refreshFilled() {
+    const t = selected();
+    if (!t) return;
+    $('bubble').innerHTML = `${formatWa(fill(t.body))}<span class="time">${clock()}</span>`;
+    $('waLink').href = waHref(t);
   }
 
   function render() { renderChips(); renderList(); renderDetail(); }
 
   let toastTimer;
-  function toast(msg) {
+  function toast(msg, action = null) {
     const el = $('toast');
-    el.textContent = msg; el.hidden = false;
+    el.innerHTML = `<span>${esc(msg)}</span>${action ? `<button type="button" id="toastAct">${esc(action.label)}</button>` : ''}`;
+    if (action) $('toastAct').onclick = () => { el.hidden = true; action.run(); };
+    el.hidden = false;
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { el.hidden = true; }, 2200);
+    toastTimer = setTimeout(() => { el.hidden = true; }, action ? 7000 : 2500);
   }
 
   function legacyCopy(text) {
     const area = document.createElement('textarea');
     area.value = text;
     area.style.position = 'fixed'; area.style.opacity = '0';
-    document.body.append(area); area.select();
+    (document.querySelector('dialog[open]') || document.body).append(area);
+    area.select();
     let ok = false;
     try { ok = document.execCommand('copy'); } catch {}
     area.remove();
     return ok;
   }
 
-  async function copyTemplate(id, button) {
-    const t = state.items.find((x) => x.id === id);
-    if (!t) return;
+  function markUsed(t) {
+    state.recent = [t.id, ...state.recent.filter((id) => id !== t.id)].slice(0, 8);
+    device.set('recent', state.recent);
+    const period = PERIODS.find((p) => p.test.test(t.category));
+    if (period) {
+      todayState().done[period.key] = t.id;
+      device.set('today', state.today);
+    }
+  }
+
+  async function copyTemplate(id) {
+    const t = find(id);
+    if (!t) return false;
+    const text = fill(t.body);
     let ok = false;
-    try { await navigator.clipboard.writeText(t.body); ok = true; } catch { ok = legacyCopy(t.body); }
-    if (!ok) { toast('Gagal menyalin. Pilih teks di pratinjau lalu salin manual.'); return; }
-    toast(`“${t.title}” tersalin`);
-    const original = button.innerHTML;
-    button.classList.add('done');
-    button.innerHTML = `${ICON.check}Tersalin`;
-    setTimeout(() => { if (button.isConnected) { button.classList.remove('done'); button.innerHTML = original; } }, 1500);
+    try { await navigator.clipboard.writeText(text); ok = true; } catch { ok = legacyCopy(text); }
+    if (!ok) { toast('Gagal menyalin. Tekan lama teks di pratinjau untuk menyalin manual.'); return false; }
+    markUsed(t);
+    renderChips(); renderList();
+    const left = emptySlots(t.body);
+    toast(left ? `Tersalin. ${left} bagian belum diisi.` : `“${t.title}” tersalin`);
+    document.querySelectorAll(`[data-copy="${CSS.escape(id)}"]`).forEach((button) => {
+      const original = button.innerHTML;
+      button.classList.add('done');
+      button.innerHTML = `${ICON.check}<span>Tersalin</span>`;
+      setTimeout(() => { if (button.isConnected) { button.classList.remove('done'); button.innerHTML = original; } }, 1500);
+    });
+    return true;
+  }
+
+  // Tombol Back HP mengikuti langkah di dalam web: form, lalu template, lalu daftar.
+  let historyWorks = true;
+  let listScroll = 0;
+  function pushView(view) {
+    try { history.pushState({ view }, ''); } catch { historyWorks = false; }
+  }
+  function syncView(view) {
+    if ($('editor').open && view !== 'editor') $('editor').close();
+    if (view !== 'detail' && view !== 'editor' && app.classList.contains('reading')) {
+      app.classList.remove('reading');
+      $('list').scrollTop = listScroll;
+    }
+  }
+  function goBack(view) {
+    if (historyWorks) history.back(); else syncView(view);
+  }
+  window.addEventListener('popstate', (e) => syncView(e.state && e.state.view));
+
+  function showDetail() {
+    if (!narrow() || app.classList.contains('reading')) return;
+    listScroll = $('list').scrollTop;
+    app.classList.add('reading');
+    pushView('detail');
+  }
+
+  function renderCatPick() {
+    const current = $('fCat').value.trim();
+    $('catPick').innerHTML = [...new Set([...CATEGORY_ORDER, ...categories()])].map((c) =>
+      `<button type="button" class="chip" data-pick="${esc(c)}" aria-pressed="${c === current}">${esc(c)}</button>`).join('');
+  }
+
+  function setTab(tab) {
+    $('formGrid').dataset.tab = tab;
+    document.querySelectorAll('[data-tab]').forEach((b) => { if (b.tagName === 'BUTTON') b.setAttribute('aria-pressed', b.dataset.tab === tab); });
   }
 
   function openEditor(t = null) {
     state.editingId = t ? t.id : null;
     $('editTitle').textContent = t ? 'Ubah template' : 'Template baru';
     $('fTitle').value = t ? t.title : '';
-    $('fCat').value = t ? t.category : (state.cat !== ALL ? state.cat : '');
+    const preset = ![ALL, FAV, RECENT].includes(state.cat) ? state.cat : '';
+    $('fCat').value = t ? t.category : preset;
     $('fBody').value = t ? t.body : '';
     $('editError').textContent = '';
+    setTab('write');
+    renderCatPick();
     updateLive();
+    pushView('editor');
     $('editor').showModal();
-    $('fTitle').focus();
+    if (!narrow()) $('fTitle').focus(); else document.activeElement.blur();
   }
 
   function updateLive() {
@@ -493,20 +782,21 @@ dialog p { margin: 0; color: var(--muted); }
     $('count').textContent = `${text.length} karakter`;
   }
 
-  function wrapSelection(mark) {
+  function insertAround(before, after, fallback = '') {
     const area = $('fBody');
     const { selectionStart: a, selectionEnd: b, value } = area;
-    area.value = value.slice(0, a) + mark + value.slice(a, b) + mark + value.slice(b);
+    const inner = value.slice(a, b) || fallback;
+    area.value = value.slice(0, a) + before + inner + after + value.slice(b);
     area.focus();
-    area.setSelectionRange(a + 1, b + 1);
+    area.setSelectionRange(a + before.length, a + before.length + inner.length);
     updateLive();
   }
 
   async function saveTemplate(e) {
     e.preventDefault();
     const data = { title: $('fTitle').value.trim(), category: $('fCat').value.trim() || 'Lainnya', body: $('fBody').value.trim() };
-    if (!data.title) { $('editError').textContent = 'Judul wajib diisi.'; $('fTitle').focus(); return; }
-    if (!data.body) { $('editError').textContent = 'Isi chat wajib diisi.'; $('fBody').focus(); return; }
+    if (!data.title) { $('editError').textContent = 'Judul wajib diisi.'; setTab('write'); $('fTitle').focus(); return; }
+    if (!data.body) { $('editError').textContent = 'Isi chat wajib diisi.'; setTab('write'); $('fBody').focus(); return; }
     const button = $('editSave');
     button.disabled = true; button.textContent = 'Menyimpan…'; $('editError').textContent = '';
     try {
@@ -515,9 +805,15 @@ dialog p { margin: 0; color: var(--muted); }
       if (!saved) return;
       state.items = id ? state.items.map((t) => (t.id === id ? saved : t)) : [...state.items, saved];
       state.sel = saved.id;
-      state.q = ''; $('q').value = ''; state.cat = ALL;
-      $('editor').close();
-      $('app').classList.add('reading');
+      state.q = ''; $('q').value = ''; state.cat = ALL; updateClear();
+      if (narrow() && !app.classList.contains('reading')) {
+        listScroll = 0;
+        try { history.replaceState({ view: 'detail' }, ''); } catch {}
+        $('editor').close();
+        app.classList.add('reading');
+      } else {
+        goBack('detail');
+      }
       render();
       toast('Template tersimpan');
     } catch (err) {
@@ -527,23 +823,59 @@ dialog p { margin: 0; color: var(--muted); }
     }
   }
 
-  async function deleteTemplate(button) {
+  async function deleteTemplate() {
     const t = selected();
     if (!t) return;
-    button.disabled = true;
     try {
       const done = await withPassword(() => store.remove(t.id));
-      if (!done) { button.disabled = false; return; }
+      if (!done) return;
       state.items = state.items.filter((x) => x.id !== t.id);
-      state.confirming = false;
-      state.sel = visible()[0]?.id || null;
-      $('app').classList.remove('reading');
+      state.sel = narrow() ? null : (visible()[0]?.id || null);
+      if (app.classList.contains('reading')) goBack('list');
       render();
-      toast('Template dihapus');
+      toast('Template dihapus', { label: 'Urungkan', run: () => restoreTemplate(t) });
     } catch (err) {
-      button.disabled = false;
       toast(err.message);
     }
+  }
+
+  async function restoreTemplate(t) {
+    try {
+      const { title, category, body } = t;
+      const saved = await withPassword(() => store.create({ title, category, body }));
+      if (!saved) return;
+      state.items = [...state.items, saved];
+      state.favorites = state.favorites.map((id) => (id === t.id ? saved.id : id));
+      state.recent = state.recent.map((id) => (id === t.id ? saved.id : id));
+      device.set('favorites', state.favorites); device.set('recent', state.recent);
+      state.sel = saved.id;
+      render();
+      toast('Template dikembalikan');
+    } catch (err) {
+      toast(`Gagal mengembalikan. ${err.message}`);
+    }
+  }
+
+  function toggleFavorite() {
+    const t = selected();
+    if (!t) return;
+    const on = state.favorites.includes(t.id);
+    state.favorites = on ? state.favorites.filter((id) => id !== t.id) : [...state.favorites, t.id];
+    device.set('favorites', state.favorites);
+    render();
+  }
+
+  function toggleDone(key) {
+    const today = todayState();
+    if (today.done[key]) delete today.done[key];
+    else today.done[key] = todayPlan().find((p) => p.key === key)?.template.id;
+    device.set('today', today);
+    renderList();
+  }
+
+  function updateClear() {
+    $('clearQ').hidden = !$('q').value;
+    $('kbd').hidden = !!$('q').value;
   }
 
   async function load() {
@@ -551,7 +883,9 @@ dialog p { margin: 0; color: var(--muted); }
     try {
       state.items = await store.list();
       state.status = 'ready';
-      state.sel = sorted()[0]?.id || null;
+      const plan = todayPlan();
+      const suggested = plan.find((p) => p.key === currentPeriod() && !p.done);
+      state.sel = suggested ? suggested.template.id : (sorted()[0]?.id || null);
     } catch (err) {
       state.status = 'error'; state.error = err.message;
     }
@@ -560,38 +894,71 @@ dialog p { margin: 0; color: var(--muted); }
 
   document.addEventListener('click', (e) => {
     const copy = e.target.closest('[data-copy]');
-    if (copy) { copyTemplate(copy.dataset.copy, copy); return; }
+    if (copy) { copyTemplate(copy.dataset.copy); return; }
+    const wa = e.target.closest('[data-wa]');
+    if (wa) { copyTemplate(wa.dataset.wa); return; }
+    const done = e.target.closest('[data-done]');
+    if (done) { toggleDone(done.dataset.done); return; }
     const open = e.target.closest('[data-open]');
     if (open) {
-      state.sel = open.dataset.open; state.confirming = false;
-      $('app').classList.add('reading');
+      state.sel = open.dataset.open;
+      showDetail();
       renderList(); renderDetail();
       return;
     }
     const chip = e.target.closest('[data-cat]');
-    if (chip) { state.cat = chip.dataset.cat; renderChips(); renderList(); return; }
+    if (chip) { state.cat = chip.dataset.cat; renderChips(); renderList(); $('list').scrollTop = 0; return; }
+    const pick = e.target.closest('[data-pick]');
+    if (pick) { $('fCat').value = pick.dataset.pick; renderCatPick(); return; }
+    const tab = e.target.closest('button[data-tab]');
+    if (tab) { setTab(tab.dataset.tab); return; }
     const wrap = e.target.closest('[data-wrap]');
-    if (wrap) { wrapSelection(wrap.dataset.wrap); return; }
+    if (wrap) { insertAround(wrap.dataset.wrap, wrap.dataset.wrap); return; }
     const act = e.target.closest('[data-act]');
     if (!act) return;
     const name = act.dataset.act;
     if (name === 'reload') load();
-    if (name === 'back') $('app').classList.remove('reading');
+    if (name === 'back') goBack('list');
     if (name === 'edit') openEditor(selected());
-    if (name === 'ask-delete') { state.confirming = true; renderDetail(); }
-    if (name === 'cancel-delete') { state.confirming = false; renderDetail(); }
-    if (name === 'delete') deleteTemplate(act);
+    if (name === 'favorite') toggleFavorite();
+    if (name === 'delete') deleteTemplate();
+    if (name === 'clear-slots') {
+      slotsOf(selected().body).forEach((s) => delete state.values[slotKey(s)]);
+      device.set('values', state.values);
+      renderDetail();
+    }
   });
 
-  $('q').addEventListener('input', (e) => { state.q = e.target.value.trim(); renderList(); });
+  document.addEventListener('input', (e) => {
+    if (!e.target.dataset.slot) return;
+    state.values[e.target.dataset.slot] = e.target.value;
+    device.set('values', state.values);
+    refreshFilled();
+  });
+
+  $('q').addEventListener('input', (e) => { state.q = e.target.value.trim(); updateClear(); renderList(); });
+  $('q').addEventListener('keydown', (e) => { if (e.key === 'Enter') e.target.blur(); });
+  $('clearQ').addEventListener('click', () => { $('q').value = ''; state.q = ''; updateClear(); renderList(); $('q').focus(); });
+  $('chips').addEventListener('scroll', updateChipFade, { passive: true });
+  window.addEventListener('resize', updateChipFade);
   $('add').addEventListener('click', () => openEditor());
+  $('addSlot').addEventListener('click', () => insertAround('[', ']', 'isian'));
   $('editForm').addEventListener('submit', saveTemplate);
-  $('editCancel').addEventListener('click', () => $('editor').close());
+  $('editCancel').addEventListener('click', () => goBack(state.editingId ? 'detail' : 'list'));
+  $('editor').addEventListener('cancel', (e) => { e.preventDefault(); goBack('list'); });
   $('fBody').addEventListener('input', updateLive);
+  $('fCat').addEventListener('input', renderCatPick);
   document.addEventListener('keydown', (e) => {
     const typing = /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName);
     if (e.key === '/' && !typing && !document.querySelector('dialog[open]')) { e.preventDefault(); $('q').focus(); }
   });
+
+  // Jaga form tetap di atas keyboard di HP.
+  if (window.visualViewport) {
+    const setHeight = () => document.documentElement.style.setProperty('--vvh', `${window.visualViewport.height}px`);
+    window.visualViewport.addEventListener('resize', setHeight);
+    setHeight();
+  }
 
   $('notice').hidden = !DEMO;
   load();
