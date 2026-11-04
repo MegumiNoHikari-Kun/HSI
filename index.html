@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- /head-meta -->
+<title>Copas Musrif</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: daftar template di kiri untuk mencari dan menyalin cepat, gelembung chat di kanan untuk melihat hasilnya. */
+:root {
+  --bg: #eef2f0;
+  --surface: #ffffff;
+  --surface-2: #f5f8f6;
+  --fg: #14211e;
+  --muted: #5a6b66;
+  --line: #d8e1dd;
+  --accent: #0a6b5c;
+  --accent-hover: #085548;
+  --on-accent: #ffffff;
+  --accent-soft: #dcefe9;
+  --hit: #ffe59a;
+  --hit-fg: #3d2e00;
+  --danger: #b3261e;
+  --danger-soft: #fbe9e7;
+  --wall: #e6ded3;
+  --bubble: #d9fdd3;
+  --bubble-fg: #111b21;
+  --slot: #fff0b8;
+  --slot-fg: #5c4300;
+  --shadow: 0 16px 48px rgba(12, 40, 34, .2);
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Figtree", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1715; --surface: #15211e; --surface-2: #1b2926; --fg: #e7efec; --muted: #9db0aa; --line: #2b3b37;
+    --accent: #3fc3a6; --accent-hover: #63d6bd; --on-accent: #06231d; --accent-soft: #1d3d36;
+    --hit: #6b5310; --hit-fg: #ffeec0; --danger: #ff9d94; --danger-soft: #41211e;
+    --wall: #0b1412; --bubble: #005c4b; --bubble-fg: #e9f6f2; --slot: #6b5310; --slot-fg: #ffeec0;
+    --shadow: 0 16px 48px rgba(0, 0, 0, .55); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1715; --surface: #15211e; --surface-2: #1b2926; --fg: #e7efec; --muted: #9db0aa; --line: #2b3b37;
+  --accent: #3fc3a6; --accent-hover: #63d6bd; --on-accent: #06231d; --accent-soft: #1d3d36;
+  --hit: #6b5310; --hit-fg: #ffeec0; --danger: #ff9d94; --danger-soft: #41211e;
+  --wall: #0b1412; --bubble: #005c4b; --bubble-fg: #e9f6f2; --slot: #6b5310; --slot-fg: #ffeec0;
+  --shadow: 0 16px 48px rgba(0, 0, 0, .55); color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 400 15px/1.5 var(--body); }
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.app { height: 100%; display: flex; flex-direction: column; min-height: 0; }
+
+.notice { background: var(--accent-soft); font-size: 13px; padding-block: 6px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+.top { display: flex; align-items: center; gap: 16px; background: var(--surface); border-bottom: 1px solid var(--line); padding-block: 12px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.brand { font: 700 22px/1 var(--display); letter-spacing: -.02em; margin: 0; white-space: nowrap; }
+.brand span { color: var(--accent); }
+.search { flex: 1; min-width: 0; max-width: 560px; position: relative; display: flex; align-items: center; }
+.search svg { position: absolute; left: 12px; color: var(--muted); pointer-events: none; }
+.search input { width: 100%; height: 42px; padding: 0 44px 0 40px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); }
+.search input::-webkit-search-cancel-button { display: none; }
+.search kbd { position: absolute; right: 10px; font: 500 12px var(--body); color: var(--muted); border: 1px solid var(--line); border-radius: 5px; padding: 0 6px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 42px; padding: 0 15px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); font-weight: 600; white-space: nowrap; }
+.btn:hover { background: var(--surface-2); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+.btn.danger { color: var(--danger); }
+.btn.danger.solid { background: var(--danger); border-color: var(--danger); color: var(--surface); }
+.btn:disabled { opacity: .6; cursor: default; }
+.top .btn { margin-left: auto; }
+
+.main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(320px, 420px) minmax(0, 1fr); }
+.list-pane { min-height: 0; min-width: 0; display: flex; flex-direction: column; background: var(--surface); border-right: 1px solid var(--line); }
+.chips { display: flex; gap: 6px; overflow-x: auto; padding: 12px 16px; border-bottom: 1px solid var(--line); scrollbar-width: none; flex: none; }
+.chip { flex: none; border: 1px solid var(--line); background: transparent; border-radius: 99px; padding: 4px 12px; font-size: 13px; font-weight: 500; color: var(--muted); }
+.chip:hover { color: var(--fg); }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.scroll { flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 16px; }
+.group-title { position: sticky; top: 0; z-index: 1; margin: 0; padding: 12px 16px 5px; background: var(--surface); font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.rows { list-style: none; margin: 0; padding: 0 8px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; }
+.row { display: flex; align-items: center; gap: 4px; border-radius: 10px; }
+.row:hover { background: var(--surface-2); }
+.row.on { background: var(--accent-soft); }
+.row-main { flex: 1; min-width: 0; border: 0; background: none; text-align: left; padding: 9px 8px; border-radius: 10px; }
+.row-title { display: block; font-weight: 600; overflow-wrap: anywhere; }
+.row-snippet { display: block; color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+mark.hit { background: var(--hit); color: var(--hit-fg); border-radius: 2px; }
+.copy-mini { display: inline-flex; align-items: center; gap: 5px; flex: none; min-height: 36px; margin-right: 6px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--accent); font-size: 13px; font-weight: 600; }
+.copy-mini:hover { border-color: var(--accent); }
+.copy-mini svg { width: 15px; height: 15px; }
+.copy-mini.done, .btn.done { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+
+.state { padding: 32px 20px; text-align: center; color: var(--muted); display: grid; gap: 12px; justify-items: center; }
+.state strong { color: var(--fg); overflow-wrap: anywhere; }
+
+.detail { min-width: 0; min-height: 0; display: flex; flex-direction: column; background: var(--wall); }
+.detail-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: var(--surface); border-bottom: 1px solid var(--line); padding: 12px 20px; }
+.detail-info { flex: 1; min-width: 200px; }
+.detail-info h2 { margin: 0; font: 600 20px/1.25 var(--display); letter-spacing: -.01em; text-wrap: balance; overflow-wrap: anywhere; }
+.meta { margin: 2px 0 0; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.back { display: none; }
+.confirm { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: var(--danger-soft); padding: 10px 20px; }
+.confirm p { margin: 0 auto 0 0; font-weight: 500; overflow-wrap: anywhere; min-width: 0; }
+.chat { flex: 1; min-height: 0; overflow-y: auto; padding: 24px 20px; }
+.chat-inner { max-width: 620px; margin: 0 auto; display: grid; gap: 10px; }
+.bubble { position: relative; justify-self: end; max-width: 100%; min-width: 0; padding: 8px 12px 6px; background: var(--bubble); color: var(--bubble-fg); border-radius: 10px 0 10px 10px; font-size: 15px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; box-shadow: 0 1px 1px rgba(0, 0, 0, .12); }
+.bubble::after { content: ""; position: absolute; top: 0; right: -8px; border-top: 9px solid var(--bubble); border-right: 9px solid transparent; }
+.bubble .time { display: block; text-align: right; margin-top: 2px; font-size: 11px; opacity: .65; font-variant-numeric: tabular-nums; }
+.bubble code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .92em; }
+mark.slot { background: var(--slot); color: var(--slot-fg); border-radius: 3px; padding: 0 2px; }
+.hint { justify-self: end; margin: 0; font-size: 13px; color: var(--muted); }
+.hint mark { font-size: 12px; }
+
+dialog { width: min(880px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 0; border: 0; border-radius: 14px; background: var(--surface); color: var(--fg); box-shadow: var(--shadow); }
+dialog::backdrop { background: rgba(8, 24, 20, .5); }
+dialog.small { width: min(400px, calc(100vw - 32px)); }
+dialog form { display: flex; flex-direction: column; gap: 14px; padding: 20px; }
+dialog h2 { margin: 0; font: 600 20px/1.25 var(--display); }
+dialog p { margin: 0; color: var(--muted); }
+.form-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+.fields { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.field { display: grid; gap: 4px; }
+.field label, .label { font-size: 13px; font-weight: 600; }
+.field input, .field textarea { width: 100%; padding: 9px 11px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface-2); }
+.field textarea { min-height: 220px; resize: vertical; line-height: 1.45; border-radius: 0 0 9px 9px; }
+.tools { display: flex; align-items: center; gap: 2px; padding: 3px; border: 1px solid var(--line); border-bottom: 0; border-radius: 9px 9px 0 0; }
+.tools button { min-width: 36px; height: 32px; border: 0; border-radius: 6px; background: none; }
+.tools button:hover { background: var(--surface-2); }
+.tools .b { font-weight: 700; } .tools .i { font-style: italic; } .tools .s { text-decoration: line-through; }
+.tools span { margin-left: auto; padding-right: 6px; font-size: 12px; color: var(--muted); }
+.live { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.live-box { flex: 1; min-height: 180px; max-height: 390px; overflow-y: auto; padding: 16px 18px 16px 12px; border-radius: 10px; background: var(--wall); display: grid; align-content: start; }
+.form-foot { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.error { margin-right: auto; color: var(--danger); font-size: 14px; font-weight: 500; }
+
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 20; max-width: calc(100vw - 32px); background: var(--fg); color: var(--bg); padding: 9px 15px; border-radius: 9px; font-weight: 500; }
+
+@media (max-width: 760px) {
+  .top { flex-wrap: wrap; gap: 10px; }
+  .search { order: 3; flex-basis: 100%; max-width: none; }
+  .search kbd { display: none; }
+  .main { grid-template-columns: minmax(0, 1fr); }
+  .list-pane { border-right: 0; }
+  .detail { display: none; }
+  .app.reading .list-pane { display: none; }
+  .app.reading .detail { display: flex; }
+  .app.reading .top { display: none; }
+  .back { display: inline-flex; }
+  .detail-head { padding: 10px 16px; }
+  .actions { width: 100%; }
+  .actions .wide { flex: 1; }
+  .chat { padding: 16px; }
+  .form-grid { grid-template-columns: minmax(0, 1fr); }
+  .field textarea { min-height: 170px; }
+  .live-box { min-height: 110px; max-height: 200px; }
+  .form-foot .btn { flex: 1; }
+  .error { flex-basis: 100%; }
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="notice" id="notice" hidden>Ini pratinjau dengan contoh template. Perubahan hilang saat halaman ditutup.</div>
+  <header class="top">
+    <h1 class="brand">Copas<span>Musrif</span></h1>
+    <label class="search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Cari judul atau isi template" aria-label="Cari template" autocomplete="off">
+      <kbd>/</kbd>
+    </label>
+    <button class="btn primary" id="add" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Template baru
+    </button>
+  </header>
+
+  <main class="main">
+    <section class="list-pane" aria-label="Daftar template">
+      <div class="chips" id="chips"></div>
+      <div class="scroll" id="list" aria-live="polite"></div>
+    </section>
+    <section class="detail" id="detail" aria-label="Pratinjau template"></section>
+  </main>
+</div>
+
+<dialog id="editor">
+  <form id="editForm" novalidate>
+    <h2 id="editTitle">Template baru</h2>
+    <div class="form-grid">
+      <div class="fields">
+        <div class="field">
+          <label for="fTitle">Judul</label>
+          <input id="fTitle" maxlength="120" placeholder="Contoh: Reminder pagi hari Senin" required>
+        </div>
+        <div class="field">
+          <label for="fCat">Kategori</label>
+          <input id="fCat" list="cats" maxlength="60" placeholder="Pilih atau ketik kategori baru" autocomplete="off">
+          <datalist id="cats"></datalist>
+        </div>
+        <div class="field">
+          <label for="fBody">Isi chat</label>
+          <div>
+            <div class="tools">
+              <button type="button" class="b" data-wrap="*" aria-label="Tebal">B</button>
+              <button type="button" class="i" data-wrap="_" aria-label="Miring">I</button>
+              <button type="button" class="s" data-wrap="~" aria-label="Coret">S</button>
+              <span id="count">0 karakter</span>
+            </div>
+            <textarea id="fBody" required placeholder="Tulis isi chat. Gunakan [tautan] untuk bagian yang perlu diganti."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="live">
+        <span class="label">Tampilan di WhatsApp</span>
+        <div class="live-box"><div class="bubble" id="liveBubble"></div></div>
+      </div>
+    </div>
+    <div class="form-foot">
+      <span class="error" id="editError" role="alert"></span>
+      <button class="btn" type="button" id="editCancel">Batal</button>
+      <button class="btn primary" type="submit" id="editSave">Simpan template</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="pass" class="small">
+  <form id="passForm" novalidate>
+    <h2>Masukkan kata sandi</h2>
+    <p>Kata sandi dibutuhkan untuk menyimpan perubahan.</p>
+    <div class="field">
+      <label for="fPass">Kata sandi</label>
+      <input id="fPass" type="password" autocomplete="current-password">
+    </div>
+    <div class="form-foot">
+      <span class="error" id="passError" role="alert"></span>
+      <button class="btn" type="button" id="passCancel">Batal</button>
+      <button class="btn primary" type="submit">Lanjutkan</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(() => {
+  const DEMO = !!window.COPAS_DEMO;
+  const API = '/api/templates';
+  const PASS_KEY = 'copas-musrif-pass';
+  const CATEGORY_ORDER = ['Pembukaan', 'Reminder Pagi', 'Reminder Siang', 'Evaluasi Harian', 'Langkah-langkah'];
+  const ALL = 'Semua';
+  const ICON = {
+    copy: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>',
+    check: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
+    edit: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 5 5 5-10.5 10.5H4v-4.5L14 5Z"/></svg>',
+    trash: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6.5 7l1 13h9l1-13"/></svg>',
+    back: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>',
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const state = { items: [], status: 'loading', error: '', q: '', cat: ALL, sel: null, editingId: null, confirming: false };
+
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const getPass = () => { try { return localStorage.getItem(PASS_KEY) || ''; } catch { return memPass; } };
+  const setPass = (v) => { memPass = v; try { v ? localStorage.setItem(PASS_KEY, v) : localStorage.removeItem(PASS_KEY); } catch {} };
+  let memPass = '';
+
+  const local = {
+    list: async () => (window.COPAS_SEED || []).map((t) => ({ ...t })),
+    create: async (d) => ({ ...d, id: 'demo-' + Date.now(), updatedAt: new Date().toISOString() }),
+    update: async (id, d) => ({ ...d, id, updatedAt: new Date().toISOString() }),
+    remove: async () => true,
+  };
+
+  async function call(url, options = {}) {
+    const res = await fetch(url, {
+      ...options,
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Password': encodeURIComponent(getPass()), ...options.headers },
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw Object.assign(new Error(data.error || 'Tidak bisa terhubung ke server. Coba lagi.'), { status: res.status });
+    return data;
+  }
+
+  const remote = {
+    list: async () => (await call(API)).templates,
+    create: async (d) => (await call(API, { method: 'POST', body: JSON.stringify(d) })).template,
+    update: async (id, d) => (await call(`${API}?id=${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(d) })).template,
+    remove: async (id) => call(`${API}?id=${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  };
+  const store = DEMO ? local : remote;
+
+  // Jalankan penyimpanan. Bila kata sandi belum ada atau salah, minta lalu ulangi.
+  async function withPassword(run) {
+    for (;;) {
+      if (!DEMO && !getPass() && !(await askPassword())) return null;
+      try {
+        return await run();
+      } catch (err) {
+        if (err.status !== 401) throw err;
+        setPass('');
+        if (!(await askPassword('Kata sandi salah. Coba lagi.'))) return null;
+      }
+    }
+  }
+
+  function askPassword(message = '') {
+    return new Promise((resolve) => {
+      const dlg = $('pass');
+      $('fPass').value = '';
+      $('passError').textContent = message;
+      const finish = (ok) => {
+        $('passForm').onsubmit = null; $('passCancel').onclick = null; dlg.oncancel = null;
+        dlg.close(); resolve(ok);
+      };
+      $('passForm').onsubmit = (e) => {
+        e.preventDefault();
+        const v = $('fPass').value;
+        if (!v) { $('passError').textContent = 'Kata sandi wajib diisi.'; return; }
+        setPass(v); finish(true);
+      };
+      $('passCancel').onclick = () => finish(false);
+      dlg.oncancel = (e) => { e.preventDefault(); finish(false); };
+      dlg.showModal();
+    });
+  }
+
+  function formatWa(text) {
+    const edge = `(^|[\\s>(*_~])`;
+    const tail = `(?=$|[\\s.,!?:;)<*_~])`;
+    return esc(text)
+      .replace(/```([\s\S]+?)```/g, '<code>$1</code>')
+      .replace(new RegExp(`${edge}\\*([^\\s*](?:[^*\\n]*[^\\s*])?)\\*${tail}`, 'gm'), '$1<strong>$2</strong>')
+      .replace(new RegExp(`${edge}_([^\\s_](?:[^_\\n]*[^\\s_])?)_${tail}`, 'gm'), '$1<em>$2</em>')
+      .replace(new RegExp(`${edge}~([^\\s~](?:[^~\\n]*[^\\s~])?)~${tail}`, 'gm'), '$1<s>$2</s>')
+      .replace(/\[[^\]\n]+\]/g, '<mark class="slot">$&</mark>');
+  }
+
+  const tokens = () => state.q.toLowerCase().split(/\s+/).filter(Boolean);
+  const matches = (t, words) => {
+    const hay = `${t.title} ${t.category} ${t.body}`.toLowerCase();
+    return words.every((w) => hay.includes(w));
+  };
+  function highlight(text, words) {
+    if (!words.length) return esc(text);
+    const re = new RegExp(`(${words.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi');
+    return text.split(re).map((part, i) => (i % 2 ? `<mark class="hit">${esc(part)}</mark>` : esc(part))).join('');
+  }
+  function snippet(body, words) {
+    const flat = body.replace(/[*_~]/g, '').replace(/\s+/g, ' ').trim();
+    const lower = flat.toLowerCase();
+    const at = words.reduce((found, w) => (found >= 0 ? found : lower.indexOf(w)), -1);
+    return at > 30 ? '…' + flat.slice(at - 20) : flat;
+  }
+
+  const catRank = (c) => { const i = CATEGORY_ORDER.indexOf(c); return i < 0 ? CATEGORY_ORDER.length : i; };
+  const byCategory = (a, b) => catRank(a) - catRank(b) || a.localeCompare(b, 'id');
+  const categories = () => [...new Set(state.items.map((t) => t.category))].sort(byCategory);
+  const sorted = () => [...state.items].sort((a, b) => byCategory(a.category, b.category) || a.title.localeCompare(b.title, 'id', { numeric: true }));
+  const visible = () => {
+    const words = tokens();
+    return sorted().filter((t) => (state.cat === ALL || t.category === state.cat) && matches(t, words));
+  };
+  const selected = () => state.items.find((t) => t.id === state.sel) || null;
+
+  function renderChips() {
+    if (state.cat !== ALL && !categories().includes(state.cat)) state.cat = ALL;
+    $('chips').innerHTML = [ALL, ...categories()].map((c) =>
+      `<button type="button" class="chip" data-cat="${esc(c)}" aria-pressed="${c === state.cat}">${esc(c)}</button>`).join('');
+    $('cats').innerHTML = [...new Set([...CATEGORY_ORDER, ...categories()])].map((c) => `<option value="${esc(c)}"></option>`).join('');
+  }
+
+  function renderList() {
+    const box = $('list');
+    if (state.status === 'loading') { box.innerHTML = '<div class="state">Memuat template…</div>'; return; }
+    if (state.status === 'error') {
+      box.innerHTML = `<div class="state"><strong>Template tidak bisa dimuat</strong><span>${esc(state.error)}</span><button class="btn" type="button" data-act="reload">Coba lagi</button></div>`;
+      return;
+    }
+    const list = visible();
+    if (!list.length) {
+      box.innerHTML = state.items.length
+        ? `<div class="state"><strong>Tidak ada template yang cocok${state.q ? ` dengan “${esc(state.q)}”` : ''}</strong><span>Coba kata lain atau pilih kategori Semua.</span></div>`
+        : '<div class="state"><strong>Belum ada template</strong><span>Tekan Template baru untuk membuat yang pertama.</span></div>';
+      return;
+    }
+    const words = tokens();
+    let html = '';
+    let current = null;
+    list.forEach((t) => {
+      if (t.category !== current) {
+        if (current !== null) html += '</ul>';
+        current = t.category;
+        html += `<h2 class="group-title">${esc(current)}</h2><ul class="rows">`;
+      }
+      html += `<li class="row${t.id === state.sel ? ' on' : ''}">
+        <button type="button" class="row-main" data-open="${esc(t.id)}">
+          <span class="row-title">${highlight(t.title, words)}</span>
+          <span class="row-snippet">${highlight(snippet(t.body, words), words)}</span>
+        </button>
+        <button type="button" class="copy-mini" data-copy="${esc(t.id)}" aria-label="Salin ${esc(t.title)}">${ICON.copy}Salin</button>
+      </li>`;
+    });
+    box.innerHTML = html + '</ul>';
+  }
+
+  function renderDetail() {
+    const t = selected();
+    const box = $('detail');
+    if (!t) { box.innerHTML = '<div class="state" style="margin:auto">Pilih template untuk melihat tampilannya.</div>'; return; }
+    const date = new Date(t.updatedAt);
+    const when = isNaN(date) ? '' : ` · Diperbarui ${date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+    const clock = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    const hasSlot = /\[[^\]\n]+\]/.test(t.body);
+    box.innerHTML = `
+      <div class="detail-head">
+        <button type="button" class="btn back" data-act="back" aria-label="Kembali ke daftar">${ICON.back}</button>
+        <div class="detail-info"><h2>${esc(t.title)}</h2><p class="meta">${esc(t.category)} · ${t.body.length} karakter${when}</p></div>
+        <div class="actions">
+          <button type="button" class="btn" data-act="edit">${ICON.edit}Ubah</button>
+          <button type="button" class="btn danger" data-act="ask-delete">${ICON.trash}Hapus</button>
+          <button type="button" class="btn primary wide" data-copy="${esc(t.id)}">${ICON.copy}Salin template</button>
+        </div>
+      </div>
+      ${state.confirming ? `<div class="confirm" role="alert"><p>Hapus “${esc(t.title)}”?</p>
+        <button type="button" class="btn" data-act="cancel-delete">Batal</button>
+        <button type="button" class="btn danger solid" data-act="delete">Hapus template</button></div>` : ''}
+      <div class="chat"><div class="chat-inner">
+        <div class="bubble">${formatWa(t.body)}<span class="time">${clock}</span></div>
+        ${hasSlot ? '<p class="hint">Ganti bagian <mark class="slot">[yang disorot]</mark> sebelum dikirim.</p>' : ''}
+      </div></div>`;
+  }
+
+  function render() { renderChips(); renderList(); renderDetail(); }
+
+  let toastTimer;
+  function toast(msg) {
+    const el = $('toast');
+    el.textContent = msg; el.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { el.hidden = true; }, 2200);
+  }
+
+  function legacyCopy(text) {
+    const area = document.createElement('textarea');
+    area.value = text;
+    area.style.position = 'fixed'; area.style.opacity = '0';
+    document.body.append(area); area.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch {}
+    area.remove();
+    return ok;
+  }
+
+  async function copyTemplate(id, button) {
+    const t = state.items.find((x) => x.id === id);
+    if (!t) return;
+    let ok = false;
+    try { await navigator.clipboard.writeText(t.body); ok = true; } catch { ok = legacyCopy(t.body); }
+    if (!ok) { toast('Gagal menyalin. Pilih teks di pratinjau lalu salin manual.'); return; }
+    toast(`“${t.title}” tersalin`);
+    const original = button.innerHTML;
+    button.classList.add('done');
+    button.innerHTML = `${ICON.check}Tersalin`;
+    setTimeout(() => { if (button.isConnected) { button.classList.remove('done'); button.innerHTML = original; } }, 1500);
+  }
+
+  function openEditor(t = null) {
+    state.editingId = t ? t.id : null;
+    $('editTitle').textContent = t ? 'Ubah template' : 'Template baru';
+    $('fTitle').value = t ? t.title : '';
+    $('fCat').value = t ? t.category : (state.cat !== ALL ? state.cat : '');
+    $('fBody').value = t ? t.body : '';
+    $('editError').textContent = '';
+    updateLive();
+    $('editor').showModal();
+    $('fTitle').focus();
+  }
+
+  function updateLive() {
+    const text = $('fBody').value;
+    $('liveBubble').innerHTML = text.trim() ? formatWa(text) : '<span style="opacity:.6">Isi chat akan tampil di sini.</span>';
+    $('count').textContent = `${text.length} karakter`;
+  }
+
+  function wrapSelection(mark) {
+    const area = $('fBody');
+    const { selectionStart: a, selectionEnd: b, value } = area;
+    area.value = value.slice(0, a) + mark + value.slice(a, b) + mark + value.slice(b);
+    area.focus();
+    area.setSelectionRange(a + 1, b + 1);
+    updateLive();
+  }
+
+  async function saveTemplate(e) {
+    e.preventDefault();
+    const data = { title: $('fTitle').value.trim(), category: $('fCat').value.trim() || 'Lainnya', body: $('fBody').value.trim() };
+    if (!data.title) { $('editError').textContent = 'Judul wajib diisi.'; $('fTitle').focus(); return; }
+    if (!data.body) { $('editError').textContent = 'Isi chat wajib diisi.'; $('fBody').focus(); return; }
+    const button = $('editSave');
+    button.disabled = true; button.textContent = 'Menyimpan…'; $('editError').textContent = '';
+    try {
+      const id = state.editingId;
+      const saved = await withPassword(() => (id ? store.update(id, data) : store.create(data)));
+      if (!saved) return;
+      state.items = id ? state.items.map((t) => (t.id === id ? saved : t)) : [...state.items, saved];
+      state.sel = saved.id;
+      state.q = ''; $('q').value = ''; state.cat = ALL;
+      $('editor').close();
+      $('app').classList.add('reading');
+      render();
+      toast('Template tersimpan');
+    } catch (err) {
+      $('editError').textContent = err.message;
+    } finally {
+      button.disabled = false; button.textContent = 'Simpan template';
+    }
+  }
+
+  async function deleteTemplate(button) {
+    const t = selected();
+    if (!t) return;
+    button.disabled = true;
+    try {
+      const done = await withPassword(() => store.remove(t.id));
+      if (!done) { button.disabled = false; return; }
+      state.items = state.items.filter((x) => x.id !== t.id);
+      state.confirming = false;
+      state.sel = visible()[0]?.id || null;
+      $('app').classList.remove('reading');
+      render();
+      toast('Template dihapus');
+    } catch (err) {
+      button.disabled = false;
+      toast(err.message);
+    }
+  }
+
+  async function load() {
+    state.status = 'loading'; render();
+    try {
+      state.items = await store.list();
+      state.status = 'ready';
+      state.sel = sorted()[0]?.id || null;
+    } catch (err) {
+      state.status = 'error'; state.error = err.message;
+    }
+    render();
+  }
+
+  document.addEventListener('click', (e) => {
+    const copy = e.target.closest('[data-copy]');
+    if (copy) { copyTemplate(copy.dataset.copy, copy); return; }
+    const open = e.target.closest('[data-open]');
+    if (open) {
+      state.sel = open.dataset.open; state.confirming = false;
+      $('app').classList.add('reading');
+      renderList(); renderDetail();
+      return;
+    }
+    const chip = e.target.closest('[data-cat]');
+    if (chip) { state.cat = chip.dataset.cat; renderChips(); renderList(); return; }
+    const wrap = e.target.closest('[data-wrap]');
+    if (wrap) { wrapSelection(wrap.dataset.wrap); return; }
+    const act = e.target.closest('[data-act]');
+    if (!act) return;
+    const name = act.dataset.act;
+    if (name === 'reload') load();
+    if (name === 'back') $('app').classList.remove('reading');
+    if (name === 'edit') openEditor(selected());
+    if (name === 'ask-delete') { state.confirming = true; renderDetail(); }
+    if (name === 'cancel-delete') { state.confirming = false; renderDetail(); }
+    if (name === 'delete') deleteTemplate(act);
+  });
+
+  $('q').addEventListener('input', (e) => { state.q = e.target.value.trim(); renderList(); });
+  $('add').addEventListener('click', () => openEditor());
+  $('editForm').addEventListener('submit', saveTemplate);
+  $('editCancel').addEventListener('click', () => $('editor').close());
+  $('fBody').addEventListener('input', updateLive);
+  document.addEventListener('keydown', (e) => {
+    const typing = /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName);
+    if (e.key === '/' && !typing && !document.querySelector('dialog[open]')) { e.preventDefault(); $('q').focus(); }
+  });
+
+  $('notice').hidden = !DEMO;
+  load();
+})();
+</script>
+</body>
+</html>

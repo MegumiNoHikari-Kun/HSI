@@ -1,0 +1,53 @@
+{
+  "templates": [
+    {
+      "id": "contoh-pembukaan",
+      "title": "Pembukaan grup halaqah",
+      "category": "Pembukaan",
+      "body": "Bismillah.\n\nAssalamu'alaikum warahmatullahi wabarakatuh.\n\nAhlan wa sahlan Bapak/Ibu sekalian di grup *[nama grup]*. Perkenalkan, saya *[nama musrif]*, musrif yang akan mendampingi selama program ini.\n\nSilakan memperkenalkan diri dengan menyebutkan nama dan kota domisili ya.\n\nJazaakumullahu khairan.",
+      "updatedAt": "2026-11-04T07:00:00.000Z"
+    },
+    {
+      "id": "contoh-reminder-pagi",
+      "title": "Reminder pagi",
+      "category": "Reminder Pagi",
+      "body": "Assalamu'alaikum warahmatullahi wabarakatuh.\n\nShabahul khair, Bapak/Ibu. Jangan lupa materi hari ini:\n\n*[judul materi]*\n\nSemoga Allah memudahkan kita untuk belajar dan mengamalkannya.",
+      "updatedAt": "2026-11-04T07:00:00.000Z"
+    },
+    {
+      "id": "contoh-reminder-siang",
+      "title": "Reminder siang",
+      "category": "Reminder Siang",
+      "body": "Assalamu'alaikum warahmatullahi wabarakatuh.\n\nBapak/Ibu, sudahkah menyimak materi hari ini? Masih ada waktu sampai pukul *[jam batas]*.\n\n_Barakallahu fiikum._",
+      "updatedAt": "2026-11-04T07:00:00.000Z"
+    },
+    {
+      "id": "contoh-evaluasi-harian",
+      "title": "Informasi evaluasi harian",
+      "category": "Evaluasi Harian",
+      "body": "*Informasi Evaluasi Harian*\n\nMateri: [judul materi]\nBatas pengisian: [hari, tanggal, jam]\nTautan evaluasi: [tautan]\n\nMohon dikerjakan secara mandiri ya. Jazaakumullahu khairan.",
+      "updatedAt": "2026-11-04T07:00:00.000Z"
+    },
+    {
+      "id": "contoh-langkah-1",
+      "title": "Langkah 1: Simak materi",
+      "category": "Langkah-langkah",
+      "body": "*Langkah 1*\n\nSimak materi harian melalui tautan berikut:\n[tautan materi]\n\nJika sudah selesai, lanjut ke langkah 2.",
+      "updatedAt": "2026-11-04T07:00:00.000Z"
+    },
+    {
+      "id": "contoh-langkah-2",
+      "title": "Langkah 2: Kerjakan evaluasi",
+      "category": "Langkah-langkah",
+      "body": "*Langkah 2*\n\nBuka tautan evaluasi berikut, lalu jawab semua pertanyaan:\n[tautan evaluasi]\n\nPastikan sudah menekan tombol kirim.",
+      "updatedAt": "2026-11-04T07:00:00.000Z"
+    },
+    {
+      "id": "contoh-langkah-3",
+      "title": "Langkah 3: Lapor di grup",
+      "category": "Langkah-langkah",
+      "body": "*Langkah 3*\n\nTulis nama dan kata *sudah* di grup setelah evaluasi selesai.\n\nContoh: [nama] sudah",
+      "updatedAt": "2026-11-04T07:00:00.000Z"
+    }
+  ]
+}
