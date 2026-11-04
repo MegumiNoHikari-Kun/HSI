@@ -15,13 +15,6 @@
       "updatedAt": "2026-11-04T15:06:18.038Z"
     },
     {
-      "id": "contoh-langkah-1",
-      "title": "Langkah 1: Simak materi",
-      "category": "Langkah-langkah",
-      "body": "*Langkah 1*\n\nSimak materi harian melalui tautan berikut:\n[tautan materi]\n\nJika sudah selesai, lanjut ke langkah 2.",
-      "updatedAt": "2026-11-04T07:00:00.000Z"
-    },
-    {
       "id": "contoh-langkah-2",
       "title": "Langkah 2: Kerjakan evaluasi",
       "category": "Langkah-langkah",
