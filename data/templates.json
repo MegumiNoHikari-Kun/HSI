@@ -15,13 +15,6 @@
       "updatedAt": "2026-11-04T15:06:18.038Z"
     },
     {
-      "id": "contoh-reminder-siang",
-      "title": "Reminder siang",
-      "category": "Reminder Siang",
-      "body": "Assalamu'alaikum warahmatullahi wabarakatuh.\n\nBapak/Ibu, sudahkah menyimak materi hari ini? Masih ada waktu sampai pukul *[jam batas]*.\n\n_Barakallahu fiikum._",
-      "updatedAt": "2026-11-04T07:00:00.000Z"
-    },
-    {
       "id": "contoh-evaluasi-harian",
       "title": "Informasi evaluasi harian",
       "category": "Evaluasi Harian",
