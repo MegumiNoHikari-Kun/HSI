@@ -104,7 +104,8 @@ svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; s
 .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 .scroll { flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 24px; overscroll-behavior: contain; }
 .group-title { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; gap: 8px; margin: 0; padding: 12px 16px 5px; background: var(--surface); font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
-.group-title small { font-size: 12px; font-weight: 500; letter-spacing: 0; text-transform: none; }
+.today-note { margin: 0; padding: 0 16px 6px; color: var(--muted); font-size: 13px; }
+.group-title small { flex: none;  font-size: 12px; font-weight: 500; letter-spacing: 0; text-transform: none; }
 .rows { list-style: none; margin: 0; padding: 0 8px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; }
 .row { display: flex; align-items: center; gap: 4px; border-radius: 10px; min-width: 0; }
 .row:hover { background: var(--surface-2); }
@@ -336,7 +337,7 @@ dialog p { margin: 0; color: var(--muted); }
 (() => {
   const DEMO = !!window.COPAS_DEMO;
   const API = '/api/templates';
-  const CATEGORY_ORDER = ['Pembukaan', 'Reminder Pagi', 'Reminder Siang', 'Reminder Malam', 'Evaluasi Harian', 'Langkah-langkah'];
+  const CATEGORY_ORDER = ['Pembukaan', 'Reminder Pagi', 'Reminder Siang', 'Reminder Malam', 'Penyemangat', 'Evaluasi Harian', 'Langkah-langkah'];
   const ALL = 'Semua';
   const FAV = 'Favorit';
   const RECENT = 'Terakhir';
@@ -344,6 +345,7 @@ dialog p { margin: 0; color: var(--muted); }
     { key: 'pagi', label: 'Pagi', test: /\bpagi\b/i },
     { key: 'siang', label: 'Siang', test: /\bsiang\b/i },
     { key: 'malam', label: 'Malam', test: /\bmalam\b/i },
+    { key: 'semangat', label: 'Penyemangat', test: /penyemangat/i },
   ];
   const SLOT = /\[[^\]\n]+\]/g;
   const ICON = {
@@ -565,9 +567,8 @@ dialog p { margin: 0; color: var(--muted); }
     const plan = todayPlan();
     if (!plan.length) return '';
     const now = currentPeriod();
-    const date = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' });
     const finished = plan.filter((p) => p.done).length;
-    return `<h2 class="group-title">Hari ini <small>${esc(date)} · ${finished}/${plan.length} terkirim</small></h2><ul class="rows">${plan.map((p) => `
+    return `<h2 class="group-title">Saran Reminder Hari Ini <small>${finished}/${plan.length} terkirim</small></h2><p class="today-note">Berganti otomatis setiap hari. Mau kirim yang lain? Buka template di kategori yang sama, lalu salin.</p><ul class="rows">${plan.map((p) => `
       <li class="row${p.done ? ' sent' : ''}${p.template.id === state.sel ? ' on' : ''}">
         <button type="button" class="check" data-done="${p.key}" aria-pressed="${p.done}" aria-label="Tandai ${p.label} sudah dikirim"><i>${ICON.check}</i></button>
         <button type="button" class="row-main" data-open="${esc(p.template.id)}" style="padding-left:0">
