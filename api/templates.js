@@ -2,7 +2,11 @@
 const crypto = require('crypto');
 
 const FILE_PATH = 'data/templates.json';
-const MAX_RETRY = 3;
+const MAX_RETRY = 4;
+const BUSY = 'GitHub sedang gangguan sementara. Tunggu beberapa menit, lalu coba simpan lagi.';
+
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const isBusy = (status) => status === 429 || status >= 500;
 
 function config() {
   const { GITHUB_TOKEN, GITHUB_REPO, GITHUB_BRANCH, ADMIN_PASSWORD } = process.env;
@@ -35,6 +39,7 @@ async function github(cfg, options = {}) {
 async function readFile(cfg) {
   const res = await github(cfg);
   if (res.status === 404) return { templates: [], sha: undefined };
+  if (isBusy(res.status)) throw Object.assign(httpError(503, BUSY), { busy: true });
   if (!res.ok) throw httpError(502, `GitHub menolak permintaan baca (${res.status}). Periksa GITHUB_TOKEN dan GITHUB_REPO.`);
   const file = await res.json();
   const text = Buffer.from(file.content || '', 'base64').toString('utf8');
@@ -49,18 +54,32 @@ async function writeFile(cfg, templates, sha, message) {
     body: JSON.stringify({ message, content, sha, branch: cfg.branch }),
   });
   if (res.status === 409 || res.status === 422) return false; // file berubah saat proses, ulangi
-  if (!res.ok) throw httpError(502, `GitHub menolak penyimpanan (${res.status}). Pastikan token punya izin Contents: Read and write.`);
+  if (isBusy(res.status)) throw Object.assign(httpError(503, BUSY), { busy: true });
+  if (res.status === 401 || res.status === 403 || res.status === 404) {
+    throw httpError(502, `GitHub menolak penyimpanan (${res.status}). Pastikan token masih berlaku dan punya izin Contents: Read and write.`);
+  }
+  if (!res.ok) throw httpError(502, `GitHub gagal menyimpan (${res.status}). Coba lagi.`);
   return true;
 }
 
-// Baca, ubah, lalu tulis. Diulang bila ada orang lain menyimpan pada saat bersamaan.
+// Baca, ubah, lalu tulis. Diulang bila file berubah atau GitHub sedang gangguan.
+// Permintaan yang gagal bisa saja sudah tersimpan, jadi pengulangan tidak boleh menggandakan data.
 async function mutate(cfg, change) {
+  let lastError;
   for (let i = 0; i < MAX_RETRY; i += 1) {
-    const { templates, sha } = await readFile(cfg);
-    const { next, result, message } = change(templates);
-    if (await writeFile(cfg, next, sha, message)) return result;
+    if (i > 0) await wait(500 * i);
+    try {
+      const { templates, sha } = await readFile(cfg);
+      const { next, result, message } = change(templates, i > 0 && Boolean(lastError));
+      if (!next) return result;
+      if (await writeFile(cfg, next, sha, message)) return result;
+      lastError = null;
+    } catch (err) {
+      if (!err.busy) throw err;
+      lastError = err;
+    }
   }
-  throw httpError(409, 'Ada perubahan lain pada saat yang sama. Coba simpan lagi.');
+  throw lastError || httpError(409, 'Ada perubahan lain pada saat yang sama. Coba simpan lagi.');
 }
 
 function checkPassword(req, cfg) {
@@ -109,7 +128,7 @@ module.exports = async function handler(req, res) {
       const data = clean(req.body);
       const template = { id: crypto.randomUUID(), ...data, updatedAt: new Date().toISOString() };
       await mutate(cfg, (list) => ({
-        next: [...list, template],
+        next: list.some((t) => t.id === template.id) ? null : [...list, template],
         result: template,
         message: `Tambah template: ${template.title}`,
       }));
@@ -133,8 +152,9 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ template });
     }
 
-    await mutate(cfg, (list) => {
+    await mutate(cfg, (list, retrying) => {
       const old = list.find((t) => t.id === id);
+      if (!old && retrying) return { next: null, result: true };
       if (!old) throw httpError(404, 'Template tidak ditemukan. Mungkin sudah dihapus.');
       return { next: list.filter((t) => t.id !== id), result: true, message: `Hapus template: ${old.title}` };
     });
